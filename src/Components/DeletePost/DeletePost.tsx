@@ -15,7 +15,7 @@ export default function DeletePost({ id }: { id: string }) {
         })
     }
 
-    const { isPending, mutate } = useMutation({
+    const { mutate } = useMutation({
         mutationFn: deletePost,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
@@ -27,12 +27,12 @@ export default function DeletePost({ id }: { id: string }) {
             toast.success(data.data.message)
         },
         onError: (error: AxiosError<{ message: string }>) => {
-            toast.error(error.response.data.message)
+            toast.error(error.response?.data?.message || "Failed to delete post")
         }
     })
     return <>
         <div>
-            <Button onClick={mutate} variant="danger">Delete</Button>
+            <Button onClick={() => mutate()} variant="danger">Delete</Button>
         </div>
     </>
 }

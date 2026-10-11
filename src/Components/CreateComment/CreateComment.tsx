@@ -8,7 +8,7 @@ export default function CreateComment({ id }: { id: string }) {
 
     const queryClient = useQueryClient()
 
-    const [imgSrc, setImgSrc] = useState(null)
+    const [imgSrc, setImgSrc] = useState<string | null>(null)
     const [img, setImg] = useState<File | null>(null)
 
     const commentContent = useRef<HTMLInputElement>(null)
@@ -29,17 +29,19 @@ export default function CreateComment({ id }: { id: string }) {
             })
 
             closeImage()
-            commentContent.current.value = ""
+            if (commentContent.current) {
+                commentContent.current.value = ""
+            }
         },
         onError: (error: AxiosError<{ message: string }>) => {
-            toast.error(error.response.data.message)
+            toast.error(error.response?.data?.message || "Failed to add comment")
         }
     })
 
     function createComment() {
         const formData = new FormData()
 
-        if (commentContent.current.value != "") {
+        if (commentContent.current && commentContent.current.value != "") {
             formData.append("content", commentContent.current.value)
         }
 
@@ -61,15 +63,21 @@ export default function CreateComment({ id }: { id: string }) {
 
 
     function handleImage() {
-        const url = URL.createObjectURL(commentImage.current.files?.[0])
-        setImgSrc(url)
-        setImg(commentImage.current.files?.[0])
+        const file = commentImage.current?.files?.[0]
+        if (file) {
+            const url = URL.createObjectURL(file)
+            setImgSrc(url)
+            setImg(file)
+        }
 
     }
 
     function closeImage() {
         setImgSrc(null)
-        commentImage.current!.value = ""
+        setImg(null)
+        if (commentImage.current) {
+            commentImage.current.value = ""
+        }
     }
     return <>
         <div className="mt-2 w-full flex flex-col gap-3">
@@ -86,7 +94,7 @@ export default function CreateComment({ id }: { id: string }) {
                 </div>
                 
                 <Button onClick={() => mutate()} className="bg-blue-600 hover:bg-blue-700 text-white min-w-0 px-5 h-10 rounded-xl font-medium transition-colors shadow-sm shrink-0">
-                    {isPending ? <Spinner size="sm" color="white" /> : "Send"}
+                    {isPending ? <Spinner size="sm" color="current" /> : "Send"}
                 </Button>
             </div>
 

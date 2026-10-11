@@ -8,66 +8,41 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import * as z from "zod";
 
-type Inputs = {
-    name: string
-    username: string
-    email: string
-    gender: string
-    dateOfBirth: string
-    password: string
-    rePassword: string
-}
+const schema = z.object({
+    name: z.string().min(3, "min length 3").max(15, "max length 15"),
+    username: z.string().regex(/^[a-z0-9_]{3,30}$/, "Username must be 3–30 characters (lowercase letters, numbers, and _ only)."),
+    email: z.string().email("inValid email"),
+    gender: z.enum(["male", "female"]),
+    dateOfBirth: z.string().refine(function (value) {
+        const year = new Date().getFullYear()
+        const userYear = new Date(value).getFullYear()
+        return year - userYear >= 18
+    }, "must be older"),
+    password: z.string().regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, "Password must be at least 8 characters and include an uppercase letter, lowercase letter, number, and special character."),
+    rePassword: z.string().regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, "rePassword must be at least 8 characters and include an uppercase letter, lowercase letter, number, and special character."),
+}).refine(function (values) {
+    return values.password === values.rePassword
+}, { message: "msh tamam", path: ["rePassword"] })
 
-
+type Inputs = z.infer<typeof schema>
 
 export default function Register() {
 
-    const [isLoading, setIsLoading] = useState<Boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const navigate = useNavigate()
-
-
-    const schema = z.object({
-        name: z.string().min(3, "min length 3").max(15, "max length 15"),
-        username: z.string().regex(/^[a-z0-9_]{3,30}$/, "Username must be 3–30 characters (lowercase letters, numbers, and _ only)."),
-        email: z.string().email("inValid email"),
-        gender: z.enum(["male", "female"], "male or femal"),
-        dateOfBirth: z.coerce.date().refine(function (value) {
-
-            const year = new Date().getFullYear()
-            const userYear = value.getFullYear()
-
-            if (year - userYear >= 18) {
-                return true
-            }
-
-            return false
-        }, "must be older"),
-        password: z.string().regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, "Password must be at least 8 characters and include an uppercase letter, lowercase letter, number, and special character."),
-        rePassword: z.string().regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, "rePassword must be at least 8 characters and include an uppercase letter, lowercase letter, number, and special character."),
-    }).refine(function (values) {
-
-        if (values.password === values.rePassword) {
-            return true
-        }
-
-        return false
-
-    }, { message: "msh tamam", path: ["rePassword"] })
-
 
     const { register, handleSubmit, formState: { touchedFields, errors } } = useForm<Inputs>({
         defaultValues: {
             name: "",
             username: "",
             email: "",
-            gender: "",
+            gender: "male",
             dateOfBirth: "",
             password: "",
             rePassword: ""
         },
         resolver: zodResolver(schema)
     })
-
 
     async function SignUp(values: Inputs) {
         setIsLoading(true)
@@ -82,11 +57,13 @@ export default function Register() {
             toast.success(data.message)
             navigate("/login")
         } catch (error) {
-            toast.error(error.response.data.message)
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || "Registration failed")
+            } else {
+                toast.error("Registration failed")
+            }
             setIsLoading(false)
         }
-
-
     }
     return <>
         <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

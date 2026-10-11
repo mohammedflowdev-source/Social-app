@@ -1,12 +1,16 @@
 import { createContext, useEffect, useState, type ReactNode } from "react"
 
-interface AuthContextType {
+export interface AuthContextType {
     token: string | null
     insertUserToken: (tkn: string) => void
     logoutContext: () => void
 }
 
-export const authContext = createContext<AuthContextType | null>(null)
+export const authContext = createContext<AuthContextType>({
+    token: null,
+    insertUserToken: () => {},
+    logoutContext: () => {},
+})
 
 
 

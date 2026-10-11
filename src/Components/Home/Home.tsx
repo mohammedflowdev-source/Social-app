@@ -1,16 +1,12 @@
-import { Avatar, Button, Dropdown, Label, Spinner, Typography } from "@heroui/react";
-import axios from "axios"
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { Spinner, Typography } from "@heroui/react";
+import axios from "axios";
 import Post from "../Post/Post";
 import { useQuery } from "@tanstack/react-query";
 import CreatePost from "../CreatePost/CreatePost";
+import type { Post as PostType } from "../../Interface/PostInterface";
 
 
 export default function Home() {
-
-    // const [posts, setPosts] = useState(null)
-
 
     function getAllPosts() {
         return axios.get("https://route-posts.routemisr.com/posts", {
@@ -20,7 +16,7 @@ export default function Home() {
         })
     }
 
-    const { data, isError, isFetching, isLoading } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["Posts"],
         queryFn: getAllPosts,
         refetchInterval: 3000
@@ -44,7 +40,7 @@ export default function Home() {
                     <CreatePost />
                     
                     <div className="mt-8">
-                        {data?.data.data.posts.map(function (post, idx: number) {
+                        {data?.data.data.posts.map(function (post: PostType, idx: number) {
                             return <Post key={idx} post={post} isPostDetails={false} />;
                         })}
                     </div>

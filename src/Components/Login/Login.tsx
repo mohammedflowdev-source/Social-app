@@ -21,7 +21,7 @@ type Inputs = {
 
 export default function Login() {
     const { insertUserToken } = useContext(authContext)
-    const [isLoading, setIsLoading] = useState<Boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const navigate = useNavigate()
 
 
@@ -55,7 +55,11 @@ export default function Login() {
             toast.success(data.message)
             navigate("/")
         } catch (error) {
-            toast.error(error.response.data.message)
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || "Login failed")
+            } else {
+                toast.error("Login failed")
+            }
             setIsLoading(false)
         }
 

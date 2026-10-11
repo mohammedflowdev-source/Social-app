@@ -23,6 +23,10 @@ export default function PostDetails() {
     if (isLoading) {
         return <div className="h-screen flex justify-center items-center "><Spinner size="xl" /></div>
     }
+
+    if (!data?.data?.data?.post) {
+        return null
+    }
     return <>
         <div className="my-8 max-w-2xl mx-auto">
             <div className="px-4 md:px-0 w-full mb-8">

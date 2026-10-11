@@ -1,4 +1,4 @@
-import { Avatar, Button, Dropdown, Label, Typography } from "@heroui/react";
+import { Avatar } from "@heroui/react";
 import type { Post as PostType } from "../../Interface/PostInterface";
 import { Link } from "react-router-dom";
 import CommentHeader from "../CommentHeader/CommentHeader";

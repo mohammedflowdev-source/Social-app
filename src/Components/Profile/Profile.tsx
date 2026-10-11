@@ -1,4 +1,4 @@
-import { Avatar, Spinner, Typography } from "@heroui/react";
+import { Avatar, Spinner } from "@heroui/react";
 import CreatePost from "../CreatePost/CreatePost";
 import Post from "../Post/Post";
 import { jwtDecode } from "jwt-decode";
@@ -80,7 +80,10 @@ export default function Profile() {
                     {/* Left Column */}
                     <div className="flex-1">
                         <div className="flex items-center gap-6 mb-8">
-                            <Avatar className="w-24 h-24 text-large border-4 border-white shadow-sm bg-slate-100" src={photo} />
+                            <Avatar className="w-24 h-24 text-large border-4 border-white shadow-sm bg-slate-100">
+                                <Avatar.Image alt={name} src={photo} />
+                                <Avatar.Fallback>{name?.[0]}</Avatar.Fallback>
+                            </Avatar>
                             <div>
                                 <h2 className="text-3xl font-black text-slate-800">{name}</h2>
                                 <p className="text-slate-500 font-medium mb-3">@{name.toLowerCase().replace(/\s+/g, "")}</p>

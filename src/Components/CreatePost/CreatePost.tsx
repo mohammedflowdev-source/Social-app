@@ -1,6 +1,6 @@
-import { Button, Input, Spinner, TextArea } from "@heroui/react";
+import { Button, Spinner, TextArea } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -9,7 +9,7 @@ export default function CreatePost() {
 
     const queryClient = useQueryClient()
 
-    const [imgSrc, setImgSrc] = useState(null)
+    const [imgSrc, setImgSrc] = useState<string | null>(null)
     const [img, setImg] = useState<File | null>(null)
 
     const postBody = useRef<HTMLTextAreaElement>(null)
@@ -30,17 +30,19 @@ export default function CreatePost() {
             })
 
             closeImage()
-            postBody.current.value = ""
+            if (postBody.current) {
+                postBody.current.value = ""
+            }
         },
-        onError: (error) => {
-            toast.error(error.response.data.message)
+        onError: (error: AxiosError<{ message: string }>) => {
+            toast.error(error.response?.data?.message || "Failed to create post")
         }
     })
 
     function createPost() {
         const formData = new FormData()
 
-        if (postBody.current.value != "") {
+        if (postBody.current && postBody.current.value != "") {
             formData.append("body", postBody.current.value)
         }
 
@@ -62,15 +64,21 @@ export default function CreatePost() {
 
 
     function handleImage() {
-        const url = URL.createObjectURL(PostImage.current.files?.[0])
-        setImgSrc(url)
-        setImg(PostImage.current.files?.[0])
+        const file = PostImage.current?.files?.[0]
+        if (file) {
+            const url = URL.createObjectURL(file)
+            setImgSrc(url)
+            setImg(file)
+        }
 
     }
 
     function closeImage() {
         setImgSrc(null)
-        PostImage.current!.value = ""
+        setImg(null)
+        if (PostImage.current) {
+            PostImage.current.value = ""
+        }
     }
     return <>
         <div className="my-5 w-full mx-auto bg-white p-5 rounded-2xl shadow-sm border border-slate-200 transition-shadow hover:shadow-md">
@@ -100,7 +108,7 @@ export default function CreatePost() {
             )}
 
             <Button onClick={() => mutate()} className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 font-medium transition-all shadow-sm">
-                {isPending ? <Spinner size="sm" color="white" /> : "Publish Post"}
+                {isPending ? <Spinner size="sm" color="current" /> : "Publish Post"}
             </Button>
         </div>
     </>
